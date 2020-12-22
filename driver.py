@@ -21,6 +21,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 PRE_TRAINED_MODEL_NAME = "bert-large-uncased"
 
+N_TRAIN_SAMPLES = 10000
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
@@ -46,11 +48,11 @@ print(f"adam_epsilon: {adam_epsilon}")
 
 tokenizer = BertTokenizerFast.from_pretrained(PRE_TRAINED_MODEL_NAME)
 
-if device == "cpu":
+if str(device) == "cpu":
     df_train = pd.read_csv("./cosmosqa/data/train_sample.csv")
     df_valid = pd.read_csv("./cosmosqa/data/valid_sample.csv")
 else:
-    df_train = pd.read_csv("./cosmosqa/data/train.csv")
+    df_train = pd.read_csv("./cosmosqa/data/train.csv").head(N_TRAIN_SAMPLES)
     df_valid = pd.read_csv("./cosmosqa/data/valid.csv")
 
 train_data_loader = create_data_loader(
