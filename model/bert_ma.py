@@ -1,33 +1,19 @@
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torch.nn import CrossEntropyLoss
 from transformers import BertModel, BertPreTrainedModel
-
-# config = {
-#     "attention_probs_dropout_prob": 0.1,
-#     "hidden_act": "gelu",
-#     "hidden_dropout_prob": 0.1,
-#     "hidden_size": 1024,
-#     "initializer_range": 0.02,
-#     "intermediate_size": 4096,
-#     "max_position_embeddings": 512,
-#     "num_attention_heads": 16,
-#     "num_hidden_layers": 24,
-#     "type_vocab_size": 2,
-#     "vocab_size": 30522,
-# }
 
 
 def print_debug(name, val):
-    print(f"{name}: {val}")
+    # print(f"{name}: {val}")
+    pass
 
 
 # BERT with multiway attention
 class BertMultiwayMatch(BertPreTrainedModel):
     def __init__(self, config, num_choices=4):
         super(BertMultiwayMatch, self).__init__(config)
-        print(f"Config: {config}")
+        # print(f"Config: {config}")
         self.num_choices = num_choices
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
@@ -138,11 +124,11 @@ class BertMultiwayMatch(BertPreTrainedModel):
             passage_encoded_trans, question_encoded_trans.transpose(2, 1)
         )
 
-        print()
+        print_debug("\n", "")
         print_debug("passage_encoded_trans", passage_encoded_trans.size())
         print_debug("question_encoded_trans", question_encoded_trans.size())
         print_debug("p2q_scores", p2q_scores.size())
-        print()
+        print_debug("\n", "")
 
         # fp16 compatibility
         merged_attention_mask = (
@@ -150,9 +136,9 @@ class BertMultiwayMatch(BertPreTrainedModel):
             .float()
             .matmul(question_attention_mask.unsqueeze(1).float())
         )
-        print()
+        print_debug("\n", "")
         print_debug("merged_attention_mask", merged_attention_mask.size())
-        print()
+        print_debug("\n", "")
         merged_attention_mask = merged_attention_mask.to(
             dtype=next(self.parameters()).dtype
         )
@@ -162,11 +148,11 @@ class BertMultiwayMatch(BertPreTrainedModel):
         # Normalize the attention scores to probabilities.
         p2q_w = nn.Softmax(dim=-1)(p2q_scores_)
         p2q_w_ = nn.Softmax(dim=1)(p2q_scores_)
-        print()
+        print_debug("\n", "")
         print_debug("p2q_scores_", p2q_scores_.size())
         print_debug("p2q_w", p2q_w.size())
         print_debug("p2q_w_", p2q_w_.size())
-        print()
+        print_debug("\n", "")
 
         # question attentive passage representation
         mp = torch.matmul(p2q_w, question_encoded)
@@ -268,30 +254,30 @@ class BertMultiwayMatch(BertPreTrainedModel):
         #             output_all_encoded_layers=False,
         #         )
 
-        print()
+        print_debug("\n", "")
         print_debug("input_ids", input_ids.size())
         print_debug("token_type_ids", token_type_ids.size())
         print_debug("attention_mask", attention_mask.size())
-        print()
+        print_debug("\n", "")
 
-        print()
+        print_debug("\n", "")
         print_debug("doc_len", doc_len.size())
         print_debug("ques_len", ques_len.size())
         print_debug("option_len", option_len.size())
-        print()
+        print_debug("\n", "")
 
         print_debug("labels", labels.size())
-        print()
+        print_debug("\n", "")
 
         flat_input_ids = input_ids.view(-1, input_ids.size(-1))
         flat_token_type_ids = token_type_ids.view(-1, token_type_ids.size(-1))
         flat_attention_mask = attention_mask.view(-1, attention_mask.size(-1))
 
-        print()
+        print_debug("\n", "")
         print_debug("flat_input_ids", flat_input_ids.size())
         print_debug("flat_token_type_ids", flat_token_type_ids.size())
         print_debug("flat_attention_mask", flat_attention_mask.size())
-        print()
+        print_debug("\n", "")
 
         doc_len = doc_len.view(-1, doc_len.size(0) * doc_len.size(1)).squeeze()
         ques_len = ques_len.view(
@@ -301,11 +287,11 @@ class BertMultiwayMatch(BertPreTrainedModel):
             -1, option_len.size(0) * option_len.size(1)
         ).squeeze()
 
-        print()
+        print_debug("\n", "")
         print_debug("doc_len_squeezed", doc_len.size())
         print_debug("ques_len_squeezed", ques_len.size())
         print_debug("option_len_squeezed", option_len.size())
-        print()
+        print_debug("\n", "")
 
         sequence_output, pooled_output = self.bert(
             input_ids=flat_input_ids,
@@ -313,10 +299,10 @@ class BertMultiwayMatch(BertPreTrainedModel):
             token_type_ids=flat_token_type_ids,
             return_dict=False,
         )
-        print()
+        print_debug("\n", "")
         print_debug("pooled_output", pooled_output.size())
         print_debug("sequence_output", sequence_output.size())
-        print()
+        print_debug("\n", "")
 
         (
             passage_encoded,
@@ -331,14 +317,14 @@ class BertMultiwayMatch(BertPreTrainedModel):
             ques_len=ques_len,
             option_len=option_len,
         )
-        print()
+        print_debug("\n", "")
         print_debug("passage_encoded", passage_encoded.size())
         print_debug("question_encoded", question_encoded.size())
         print_debug("answers_encoded", answers_encoded.size())
         print_debug("passage_question_encoded", passage_question_encoded.size())
         print_debug("passage_answer_encoded", passage_answer_encoded.size())
         print_debug("question_answer_encoded", question_answer_encoded.size())
-        print()
+        print_debug("\n", "")
 
         (
             passage_attention_mask,
@@ -353,7 +339,7 @@ class BertMultiwayMatch(BertPreTrainedModel):
             ques_len=ques_len,
             option_len=option_len,
         )
-        print()
+        print_debug("\n", "")
         print_debug("passage_attention_mask", passage_attention_mask.size())
         print_debug("question_attention_mask", question_attention_mask.size())
         print_debug("answers_attention_mask", answers_attention_mask.size())
@@ -369,7 +355,7 @@ class BertMultiwayMatch(BertPreTrainedModel):
             "question_answer_attention_mask",
             question_answer_attention_mask.size(),
         )
-        print()
+        print_debug("\n", "")
 
         # matching layer
         mp_q, mq_p = self.matching(
@@ -378,10 +364,10 @@ class BertMultiwayMatch(BertPreTrainedModel):
             passage_attention_mask,
             question_attention_mask,
         )
-        print()
+        print_debug("\n", "")
         print_debug("mp_q", mp_q.size())
         print_debug("mq_p", mq_p.size())
-        print()
+        print_debug("\n", "")
 
         mp_a, ma_p = self.matching(
             passage_encoded,
@@ -389,10 +375,10 @@ class BertMultiwayMatch(BertPreTrainedModel):
             passage_attention_mask,
             answers_attention_mask,
         )
-        print()
+        print_debug("\n", "")
         print_debug("mp_a", mp_a.size())
         print_debug("ma_p", ma_p.size())
-        print()
+        print_debug("\n", "")
 
         mp_qa, mqa_p = self.matching(
             passage_encoded,
@@ -400,10 +386,10 @@ class BertMultiwayMatch(BertPreTrainedModel):
             passage_attention_mask,
             question_answer_attention_mask,
         )
-        print()
+        print_debug("\n", "")
         print_debug("mp_qa", mp_qa.size())
         print_debug("mqa_p", mqa_p.size())
-        print()
+        print_debug("\n", "")
 
         mq_a, ma_q = self.matching(
             question_encoded,
@@ -442,10 +428,11 @@ class BertMultiwayMatch(BertPreTrainedModel):
         c_ = c.view(-1, c.size(2))
         logits = self.classifier(c_)
         reshaped_logits = logits.view(-1, self.num_choices)
+        return reshaped_logits
 
-        if labels is not None:
-            loss_fct = CrossEntropyLoss()
-            loss = loss_fct(reshaped_logits, labels)
-            return loss, reshaped_logits
-        else:
-            return reshaped_logits
+        # if labels is not None:
+        #     loss_fct = CrossEntropyLoss().to(self.device)
+        #     loss = loss_fct(reshaped_logits, labels)
+        #     return loss, reshaped_logits
+        # else:
+        #     return reshaped_logits
