@@ -6,6 +6,7 @@ from transformers import (
     BertTokenizerFast,
     get_linear_schedule_with_warmup,
     AdamW,
+    logging,
 )
 from torch.nn import CrossEntropyLoss
 from collections import defaultdict
@@ -13,26 +14,38 @@ from cosmosqa.data_loader.dataloader import create_data_loader
 from cosmosqa.trainer.train import train_epoch, eval_model
 from cosmosqa.model.bert_ma import BertMultiwayMatch
 
+logging.set_verbosity_error()
+
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
 PRE_TRAINED_MODEL_NAME = "bert-large-uncased"
 
-MAX_LEN = 220
-BATCH_SIZE = 2
-EPOCHS = 1
-# Parameters:
-lr = 2e-5
-adam_epsilon = 1e-8
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
+
+if device == "cpu":
+    MAX_LEN = 128
+    BATCH_SIZE = 2
+    EPOCHS = 1
+    lr = 2e-5
+    adam_epsilon = 1e-8
+else:
+    MAX_LEN = 128
+    BATCH_SIZE = 8
+    EPOCHS = 10
+    lr = 2e-5
+    adam_epsilon = 1e-8
 
 tokenizer = BertTokenizerFast.from_pretrained(PRE_TRAINED_MODEL_NAME)
 
-
-df_train = pd.read_csv("./cosmosqa/data/train_sample.csv")
-df_valid = pd.read_csv("./cosmosqa/data/valid_sample.csv")
+if device == "cpu":
+    df_train = pd.read_csv("./cosmosqa/data/train_sample.csv")
+    df_valid = pd.read_csv("./cosmosqa/data/valid_sample.csv")
+else:
+    df_train = pd.read_csv("./cosmosqa/data/train.csv")
+    df_valid = pd.read_csv("./cosmosqa/data/valid.csv")
 
 train_data_loader = create_data_loader(
     df=df_train, tokenizer=tokenizer, max_len=MAX_LEN, batch_size=BATCH_SIZE
