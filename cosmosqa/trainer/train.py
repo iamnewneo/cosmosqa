@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from tqdm import tqdm
 
 
 def accuracy(out, labels):
@@ -11,7 +12,7 @@ def train_epoch(model, data_loader, loss_fn, optimizer, device, scheduler):
     model = model.train()
     losses = []
     accuracy_sum = 0
-    for batch in data_loader:
+    for batch in tqdm(data_loader):
         input_ids = batch["input_ids"].to(device)
         attention_mask = batch["attention_mask"].to(device)
         token_type_ids = batch["token_type_ids"].to(device)
@@ -48,7 +49,7 @@ def eval_model(model, data_loader, loss_fn, device):
     losses = []
     accuracy_sum = 0
     with torch.no_grad():
-        for batch in data_loader:
+        for batch in tqdm(data_loader):
             input_ids = batch["input_ids"].to(device)
             attention_mask = batch["attention_mask"].to(device)
             token_type_ids = batch["token_type_ids"].to(device)
