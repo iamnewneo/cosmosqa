@@ -19,7 +19,7 @@ logging.set_verbosity_error()
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-PRE_TRAINED_MODEL_NAME = "bert-large-uncased"
+PRE_TRAINED_MODEL_NAME = "bert-base-uncased"
 
 N_TRAIN_SAMPLES = 10000
 
@@ -46,7 +46,7 @@ print(f"EPOCHS: {EPOCHS}")
 print(f"lr: {lr}")
 print(f"adam_epsilon: {adam_epsilon}")
 
-tokenizer = BertTokenizerFast.from_pretrained(PRE_TRAINED_MODEL_NAME)
+tokenizer = BertTokenizerFast.from_pretrained(PRE_TRAINED_MODEL_NAME, do_lower_case=True)
 
 if str(device) == "cpu":
     df_train = pd.read_csv("./cosmosqa/data/train_sample.csv")
