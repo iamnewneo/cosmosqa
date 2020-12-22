@@ -24,8 +24,7 @@ PRE_TRAINED_MODEL_NAME = "bert-large-uncased"
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-
-if device == "cpu":
+if str(device) == "cpu":
     MAX_LEN = 128
     BATCH_SIZE = 2
     EPOCHS = 1
@@ -37,6 +36,13 @@ else:
     EPOCHS = 10
     lr = 2e-5
     adam_epsilon = 1e-8
+
+print("Parameters: ")
+print(f"MAX_LEN: {MAX_LEN}")
+print(f"BATCH_SIZE: {BATCH_SIZE}")
+print(f"EPOCHS: {EPOCHS}")
+print(f"lr: {lr}")
+print(f"adam_epsilon: {adam_epsilon}")
 
 tokenizer = BertTokenizerFast.from_pretrained(PRE_TRAINED_MODEL_NAME)
 
