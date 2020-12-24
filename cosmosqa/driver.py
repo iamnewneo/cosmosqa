@@ -34,7 +34,7 @@ if str(device) == "cpu":
     adam_epsilon = 1e-8
 else:
     MAX_LEN = 128
-    BATCH_SIZE = 8
+    BATCH_SIZE = 16
     EPOCHS = 10
     lr = 2e-5
     adam_epsilon = 1e-8
